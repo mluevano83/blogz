@@ -1,12 +1,27 @@
 <!doctype html>
 <html>
     <head>
-        <title>{{title}}</title>
+        <title>Your Blog</title>
+        <style>
+            .error {
+                color: red;
+            }
+        </style>
     </head>
 <body>
-
-    {% block content %}
-    {% endblock %}
-
+    <div>
+        <a href="/blog">Main Blog Page</a>
+        <a href="/newpost">Add A Blog Post</a>
+        <h1>{{heading}}</h1>
+     </div>
+    {% with messages = get_flashed_messages() %}    
+    <ul>
+    {% for message in messages %}
+    <li class="error">{{message}}</li>
+    {% endfor %}
+    </ul>
+    {% endwith %}
+{% block content %}
+{% endblock %}
 </body>
 </html>
