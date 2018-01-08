@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, flash
+from flask import Flask, request, redirect, render_template, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -21,17 +21,24 @@ class Blog(db.Model):
 @app.route("/blog", methods=['POST', 'GET'])
 def blog():
     blogs = Blog.query.all()
-    return render_template("blog.html", heading="This Is Your Blog", blogs=blogs)
-
-@app.route("/blog")
-def post_page():
-        blog = session.query(blog).get(blog.id)
-        return render_template("post.html") 
+    title = "title"
+    body = "body"
+    if request.args:
+        blog_id = request.args.get('id')
+        for blog in blogs:
+            if int(blog_id) == blog.id:
+                title = blog.title
+                body = blog.body
+                return render_template('post.html', title=title, body=body)
+    else:
+        return render_template("blog.html", heading="What a time to be a blog", blogs=blogs)
 
 @app.route("/newpost", methods=['POST', 'GET'])
 def newpost():
     title = ""
     body = ""
+    if request.method == 'GET':
+        return render_template("newpost.html", heading="New Blog Entry")
     if request.method == 'POST':
         title = request.form['title']
         body = request.form['body']
@@ -49,9 +56,10 @@ def newpost():
             new_post = Blog(title, body)
             db.session.add(new_post)
             db.session.commit()
-            return redirect('/blog')
-
-    return render_template("newpost.html", heading="New Blog Entry")
+            blogs = Blog.query.all()
+            post = blogs[-1]
+            post_id = post.id
+            return redirect(url_for('blog' , id=post_id))
 
 if __name__ == '__main__':
     app.run()
